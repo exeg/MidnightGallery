@@ -1,0 +1,154 @@
+<% layout('layout2') %>
+
+
+
+<div id="wrapper">
+
+ <% include ../sidebar %>
+    <div id="page-content-wrapper">
+        <% include ../partials/navbar %>
+        <div class="container">
+               
+            <div class="well well-sm">
+              <%let qstring = '', qstring2 = '';%>
+              <% if (systemf=== true) {%>
+              <% qstring = '&system=true';%>
+              <% qstring2 = '?system=true';}%>
+              <strong><%=ptitle%> Images</strong>
+                <div class="btn-group">
+            <a href="#" id="list" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-th-list">
+                </span>List</a> <a href="#" id="grid" class="btn btn-default btn-sm"><span
+                    class="glyphicon glyphicon-th"></span>Grid</a>
+                </div>
+                <%if (!search) {%>
+                <div class="dropdown">
+                <!-- <a class="btn btn-primary" href="#"></a> -->
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Sort
+                  <span class="fa fa-caret-down" title="Toggle dropdown menu"></span></button>
+                <ul class="dropdown-menu">
+                  <li><a href="/images-album/<%= album + qstring2 %>"> by filename</a></li>
+                  <li><a href="/images-album/<%= album + '?' + 'sort=created' + qstring %>"> by date</a></li>
+                </ul>
+               </div>
+        <div class="btn-group">
+<form class="navbar-form" role="search" method="GET" action="/images/search/<%= systemf%>">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search" name="q">
+            <div class="input-group-btn">
+                <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+            </div>
+        </div>
+        </form>
+    </div>     
+    <% } %>
+    </div>           
+                 
+			 <% include ../partials/messages %>
+                <div id="imagesAlbum" class="row list-group">
+        <%if (images) {%>              
+				<% for(var i = 0; i < images.length; i++) {%>
+ 	
+                <div class="item col-xs-12 col-md-6 col-lg-4">
+                    <div class="thumbnail">
+                      <%if (!systemf) {%>
+                  <a class="close" data-toggle="modal" data-target="#delImgModal" href="#">×</a><%}%>
+                        <a href="<%= images[i].path %>" data-fancybox="group">
+             <img class="group list-group-image responsive-image" src="<%= images[i].path %>" alt="Lights"></a>
+                            <div class="caption">
+                            <h4 class="group inner list-group-item-heading title"><%= images[i].name%></h4>
+                            <span><%= images[i].width%>X<%= images[i].height%></span>
+                            </div>                         
+                    </div>
+	            </div>
+                <div class="modal fade" id="delImgModal" tabindex="-1" role="dialog">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Are you sure want to delete this Image?</h4>
+                      </div>
+                      <form method="POST" action="/images/delete/<%=album%>/<%=images[i].name%>">
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                       <button type="submit" class="btn btn-danger">Delete</button>
+                      </div>
+                    </form>
+                    </div><!-- /.modal-content -->
+                  </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+            <% } %>
+      
+        </div>
+        <% if (!search) {%> 
+        <div class="text-center">
+              <% if (pageCount > 1) { %>
+          <ul class="pagination">
+              <% if (currentPage > 1) { %>
+                  <li><a href="/images-album/<%= album + '?page=1' + qstring%>">&laquo;</a></li>
+              <% } %>
+              <% var i = 1;
+              if (currentPage > 5) {
+                  i = +currentPage - 4;
+              } %>
+              <% if (i !== 1) { %>
+                  <li class="disabled"><a href="#">...</a></li>
+              <% } %>
+              <% for (i; i<=pageCount; i++) { %>
+                  <% if (currentPage == i) { %>
+                      <li class="active"><span><%= i %> <span class="sr-only">(current)</span></span></li>
+                  <% } else { %>
+                      <li><a href="/images-album/<%= album + '?page=' + i + qstring %>"><%= i %></a></li>
+                  <% } %>
+                  <% if (i == (+currentPage + 4)) { %>
+                      <li class="disabled"><a href="#">...</a></li>
+                  <% break; } %>
+              <% } %>
+              <% if (currentPage != pageCount) { %>
+                  <li><a href="/images-album/<%= album + '?page=' + pageCount + qstring %>">&raquo;</a></li>
+              <% } %>
+          </ul>
+      <% }} %>
+    </div>
+     <% } %>
+    </div>
+
+</div>
+</div>
+<script>
+$(document).ready(function() {
+    $('#list').click(function(event){event.preventDefault();$('#imagesAlbum .item').addClass('list-group-item');});
+    $('#grid').click(function(event){event.preventDefault();$('#imagesAlbum .item').removeClass('list-group-item');$('#imagesAlbum .item').addClass('grid-group-item');});
+    $(".dropdown-toggle").dropdown();
+});
+</script>
+<%if (!systemf) {%>
+<script>
+$('h4').dblclick(function () {
+    $(this).attr('contenteditable', true);
+    let before = this.textContent;
+    let range = document.createRange();
+    let sel = window.getSelection();
+    let el = $(this)[0];
+    range.setStart(el.childNodes[0],1);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    el.focus();
+
+    $(this).blur(function(){
+    let myTxt = this.textContent;
+    if (before != myTxt) {
+    $.ajax({
+        type: 'post',
+        url:  '/images/rename/:id',
+        data: { id : myTxt, before : before, dirname : this.baseURI }
+    });
+  }
+     $(this).attr('contenteditable', false);
+     location.reload();
+});
+    return false;
+});
+</script>
+     <% } %>
+

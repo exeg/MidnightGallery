@@ -1,0 +1,138 @@
+<%if (album && !systemf) {%>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Please enter new Album name</h4>
+      </div>
+      <form method="POST" action="/images-album/create/<%=album%>">
+      <div class="modal-body">
+        <div class="form-group">
+        <label for="album-name" class="control-label">Album name:</label>
+            <input type="text" name="album" class="form-control" id="">
+          </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+       <button type="submit" value="album" class="btn btn-primary">Create</button>
+      </div>
+    </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="delModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">Are you sure want to delete this Album?</h4>
+      </div>
+      <form method="POST" action="/images-album/delete/<%=album%>">
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+       <button type="submit" class="btn btn-danger">Delete</button>
+      </div>
+    </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<% } %>
+<div id="sidebar-wrapper">
+    <div class="sidebar-brand"> 
+     <a href="/home">Midnight Gallery</a>
+    </div>
+
+   <ul class="sidebar-nav">
+       <img src="http://placehold.it/100x100" class="img-responsive img-circle profile_img" alt="">
+        <div class="profile_info">
+            <span>Welcome,</span>
+            <h2><%= user.fullname %></h2>
+        </div>
+<%if (album && !systemf) {%>
+        <div class="profile-userbuttons">
+
+        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModal">Create Album</button>
+
+        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delModal">Delete Album</button>
+        </div>
+        <% } %>
+
+ 
+         <!--  <li> -->
+    <% if (items) { %>
+    <% for(let i=0; i < items.length; i++) { %>
+            
+     <% if (items[i].type ==='directory'){ %>
+     <% let k = items[i].path.replace(/\\/g," "); %>
+     <% let rl = items[i].path.slice(k.length - album.length );%>
+     <%let qstring = '';%>
+     <% if (search) { %>
+     <% for(let l = 0; l < images.length; l++) {%>
+     <% let newact = images[l].pathf.replace('\\' + images[l].name, '');%>
+     <% if (items[i].path=== newact) {%>
+      <%album = newact;%>
+      <%rl = newact;%>
+      <%}}%>
+     <% } %>
+     <% if (systemf=== true) {%>
+     <% qstring = '?system=true';}%>
+<li <% if (rl === album) { %>
+    class="active"<% } %>><a href="/images-album/<%= k + qstring %>"><span id="dir"data-type="text" class="title"><%- items[i].name %></span></a>
+</li>
+            
+    <% } %>
+    <% if (items[i].hasOwnProperty('children')) { %>
+    <%- partial('treeView', {items: items[i].children, sub: items[i].name}) %>
+            <% }}} %>
+   </ul>
+  </nav> 
+</div>
+<%if(!systemf) {%>
+<script>
+
+$('a').click(function () {
+    var href = $(this).attr('href');
+
+    // Redirect only after 200 milliseconds
+    if (!$(this).data('timer')) {
+       $(this).data('timer', setTimeout(function () {
+          window.location = href;
+          
+       }, 200));
+    }
+    return false; // Prevent default action (redirecting)
+});
+
+$('a').dblclick(function () {
+    clearTimeout($(this).data('timer'));
+    $(this).data('timer', null);
+    $(this).attr('contenteditable', true);
+    let range = document.createRange();
+    let sel = window.getSelection();
+    let el = $(this)[0];
+    let before = this.text
+    range.setStart(el.childNodes[0],1);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    el.focus();
+    $(this).blur(function(){
+    let myTxt = this.text;
+    if (before != myTxt) {
+    $.ajax({
+        type: 'post',
+        url:  '/images-album/rename/:id',
+        data: { id : myTxt, before : this.pathname, dirname : before }
+    });
+  }
+     $(this).attr('contenteditable', false);
+     window.location.href = "/images";
+});
+    
+    return false;
+});
+
+</script>
+   <% } %>

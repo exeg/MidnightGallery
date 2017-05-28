@@ -1,0 +1,19 @@
+<% if(flashes) {%>
+
+<div class="inner">
+	<div class="inner--flashes">
+		<div class="flash-messages">
+   <% Object.keys(flashes).forEach(function(element, key) { %>
+   <% for(let i = 0; i < flashes[element].length; i++) {%> 
+      <div class="flash--<%-element %>">        
+     <button type="button" class="flash__remove" onClick="this.parentElement.remove()" &times;
+       <p class="flash__text"><%= flashes[element][i]%></p>
+      </div>
+      <% } %>   
+<% }); %>    
+          </div>
+        </div>        
+    </div>
+
+<% }; %>
+

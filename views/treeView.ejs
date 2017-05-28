@@ -1,0 +1,31 @@
+
+        <% for(var i=0; i < items.length; i++) { %> 
+        
+        <%if (items[i].type ==='directory'){ %>
+        <% let k = items[i].path.replace(/\\/g," "); %>
+
+        <%if (album) {%>
+        <% album = album.replace(/\s/g, '\\');}%>
+        <% let subname = sub+'\\'+items[i].name%>
+        <%let qstring = '';%>
+         <% if (search) { %>
+         <% for(let l = 0; l < images.length; l++) {%>
+         <% let newact = images[l].pathf.replace('\\' + images[l].name, '');%>
+         <% if (items[i].path=== newact) {%>
+         <% subname = newact;%> 
+         <% album = newact;%>
+         <% }} %>
+         <% } %>
+         <% if (systemf=== true) {%>
+         <% qstring = '?system=true';}%>
+        <ul class="sub-menu">
+        <li <% if (subname === album) { %>
+        class="active"<% } %>><a href="/images-album/<%= k + qstring%>"><span id="dir"data-type="text" class="title"><%- items[i].name %></span></a></ul></li> 
+        <% } %>
+        <% if (items[i].hasOwnProperty('children')) { %>
+        <ul class="sub-menu">
+        <%- partial('treeView', {items: items[i].children, sub: sub+'\\'+items[i].name})%>
+        </ul>
+        <% } %>
+       
+  <% } %>

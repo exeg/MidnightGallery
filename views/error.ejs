@@ -1,0 +1,6 @@
+<% layout('layout') %>
+<div class="inner">
+<h2><%= errorDetails.status%></h2>
+<p><%= errorDetails.message%></p>
+<pre class="error"><%- errorDetails.stackHighlighted%></pre>
+</div>

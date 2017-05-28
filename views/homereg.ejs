@@ -1,0 +1,90 @@
+<% layout('layout2') %>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Please enter new Album name</h4>
+      </div>
+      <form method="POST" action="/images-album/create/">
+      <div class="modal-body">
+        <div class="form-group">
+        <label for="album-name" class="control-label">Album name:</label>
+            <input type="text" name="album" class="form-control" id="">
+          </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+       <button type="submit" value="album" class="btn btn-primary">Create</button>
+      </div>
+    </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div>
+<div id="wrapper">
+
+    <div id="sidebar-wrapper">
+    <div class="sidebar-brand"> 
+     <a href="/home">Midnight Gallery</a>
+    </div>
+
+   <ul class="sidebar-nav">
+       <img src="http://placehold.it/100x100" class="img-responsive img-circle profile_img" alt="">
+        <div class="profile_info">
+            <span>Welcome,</span>
+            <h2><%= user.fullname %></h2>
+        </div>
+        <div class="profile-userbuttons">
+
+        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModal">Create Album</button>
+
+        <!-- <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delModal">Delete Album</button>
+        </div> -->
+    </ul>
+    </div>
+
+
+    <div id="page-content-wrapper">
+      <nav class="navbar">
+  <div class="container-fluid">
+  
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="#menu-toggle" class="btn btn-default" id="menu-toggle"><i class="fa fa-bars"></i></a>
+    </div>
+  
+    
+  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <form enctype="multipart/form-data" id="upload" action="/upload" method="post" style="display:none">
+    <input type="file" name="upload" style="width: 1px; height: 1px" multiple />
+    </form>      
+      <ul class="nav navbar-nav navbar-right nav_bar">
+          <li><a href="/sytem-images?system=true">System</a></li>
+          <li><a href="/images"><%= user.fullname %></a></li>
+          <li><a href="/logout">Logout</a></li>
+       
+      </ul>
+    </div>
+  </div>
+</nav>
+        <div class="container-fluid main_body">
+           <h1>Welcome to Midnight Gallery</h1>
+     
+         <% include partials/messages %>
+         <div class="content">
+          <p>Please create your first Album. From there you can upload images. You can rename albums and images by double click.</p>
+            
+        </div>
+    </div>
+
+</div>
+    
+    
+
+
