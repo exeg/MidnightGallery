@@ -21,7 +21,7 @@ router.post('/images-album/rename/:id', catchErrors(imageController.renameAlbum)
 
 router.get('/images/search/:id', authController.isLoggedIn, catchErrors(imageController.searchImages));
 
-router.post('/images-album/upload/:id', authController.isLoggedIn, catchErrors(imageController.upload));
+router.post('/images-album/upload/:id', authController.isLoggedIn, imageController.upload, imageController.resize);
 router.post('/images/delete/:album/:id', authController.isLoggedIn, catchErrors(imageController.deleteImage));
 router.post('/images/rename/:id', authController.isLoggedIn, catchErrors(imageController.renameImage));
 

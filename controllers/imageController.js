@@ -12,7 +12,7 @@ const find = require('find');
 const url = require('url');
 const crypto = require('crypto');
 
-const upload = multer({ 
+const uploadMutler = multer({ 
   limits: { fieldNameSize: 100, fileSize: 3145728 },
   fileFilter(req, file, cb) {
     let isPhoto = file.mimetype.startsWith('image/');
@@ -23,15 +23,15 @@ const upload = multer({
     }
    },
   storage: multer.memoryStorage()
-}).array('photo',12);
+})
 
-
-function getImagesFromDir(dirPath, userpath, allImages) {
+//&& ['.jpg', '.png'].indexOf(path.extname(fileLocation)) != -1)
+const getImagesFromDir = async (dirPath, userpath, allImages) => {
   let files = fs.readdirSync(dirPath);
   for (file of files) {
     let fileLocation = path.join(dirPath, file);
     let stat = fs.statSync(fileLocation);
-    if (stat && stat.isFile() && ['.jpg', '.png'].indexOf(path.extname(fileLocation)) != -1) {
+    if (stat && stat.isFile())  {
       let dimensions = sizeOf('public/gallery/'+ userpath + '/' + file);
       let imageObj = {
         path : '/gallery/'+ userpath + '/' + file,
@@ -129,14 +129,19 @@ exports.getImagesAlbum = async (req, res) => {
       }
   });
 
-  let imagesPromise = new Promise( (resolve, reject) => {
+//   let imagesPromise = new Promise( (resolve, reject) => {
+//     let allImages = [];
+//     //console.log(allImages);
+//     hdr = usrHome + '/'+ bstr;
+// const dd = await getImagesFromDir(newpath,hdr,allImages);
+//     resolve(allImages);
+//   });
     let allImages = [];
+//     //console.log(allImages);
     hdr = usrHome + '/'+ bstr;
-    resolve(getImagesFromDir(newpath,hdr,allImages));
-  });
-
-  const [items, images] = await Promise.all([menuItemsPromise, imagesPromise]);
-
+    let imagesPromise = await getImagesFromDir(newpath,hdr,allImages);
+    const [items, images] = await Promise.all([menuItemsPromise, imagesPromise]);
+    console.log(images);
   if (sortorder === 'created') {
     images.sort(function(a,b){
     return new Date(b.created) - new Date(a.created);
@@ -223,18 +228,18 @@ exports.removeAlbum = async (req, res) => {
   });
 };
 
-exports.upload = async (req, res) => {
-  let newpath = req.params.id.replace(/\s/g, '\\');
-  let astr = path.join(res.locals.gpath, req.user.homeDir + '/' + newpath);
+exports.upload = uploadMutler.array('photo',12);
 
-  upload(req, res, function (err) {
-    if (err) {
-      console.log(err);
-      req.flash('Error', 'Can`t upload Images.');
-      res.redirect('/images-album/' + path.join(res.locals.gpath, req.user.homeDir + '/' + newpath));
-      return;
+
+
+exports.resize = async (req, res, next) => {
+    let newpath = req.params.id.replace(/\s/g, '\\');
+    let astr = path.join(res.locals.gpath, req.user.homeDir + '/' + newpath);
+    if (!req.files) {
+    // next(); // skip to the next middleware
+    return;
   }
-  
+
    for (let i=0; i < req.files.length; i++ ){
      let filename = req.files[i].originalname;
      let exist = fs.existsSync(astr + '/' + filename);
@@ -243,19 +248,17 @@ exports.upload = async (req, res) => {
        filename = filename.substring(0, extension.length);
        filename = filename + crypto.randomBytes(10).toString('hex') + '.' + extension;
      }
-     jimp.read(req.files[i].buffer).then( function (photo) {
-     photo.resize(600, jimp.AUTO);
-     photo.write(astr + '/' + filename);
+     await jimp.read(req.files[i].buffer).then( async function (photo) {
+     await photo.resize(600, jimp.AUTO);
+     await photo.write(astr + '/' + filename);
      }).catch(function (err) {
         console.error(err);
      });
 
-   }    
-    req.flash('success', 'Your images uploded successfully.');
-    res.redirect('/images-album/' + path.join(res.locals.gpath, req.user.homeDir + '/' + newpath) + '?' + 'sort=created');
-   
-  })
-
+   }
+   req.flash('success', 'Your images uploded successfully.');
+  res.redirect('/images-album/' + path.join(res.locals.gpath, req.user.homeDir + '/' + newpath) + '?' + 'sort=created');  
+ 
 };
 
 
